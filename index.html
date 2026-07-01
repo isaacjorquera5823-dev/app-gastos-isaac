@@ -10,11 +10,11 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 :root{
---bg:#F7F7F5;--surface:#fff;--border:#E8E8E4;
+--bg:#FAFAF9;--surface:#fff;--border:#E8E6E0;
 --text:#1A1A18;--text2:#6B6B65;
---green:#2D6A4F;--green-l:#E8F4EE;
---red:#C0392B;--red-l:#FDECEA;
---warn:#D4730A;--warn-l:#FEF3E2;
+--green:#1C3D2E;--green-l:#E3EAE6;
+--red:#B54A3F;--red-l:#FBEAE7;
+--warn:#B8860B;--warn-l:#FBF2DE;
 --blue:#1B4F8A;--blue-l:#E8F0FA;
 --r:14px;--rs:8px;
 --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -141,6 +141,10 @@ select.fi{appearance:none;-webkit-appearance:none;}
 .sync-badge{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:600;margin-top:4px;display:inline-block;}
 .sync-badge.on{background:rgba(255,255,255,.2);color:#fff;}
 .sync-badge.off{background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);}
+.quick-actions{display:flex;gap:8px;padding:12px 14px 0;}
+.quick-btn{flex:1;padding:13px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Inter',sans-serif;-webkit-appearance:none;}
+.quick-btn-primary{background:var(--green);color:#fff;}
+.quick-btn-secondary{background:var(--green);color:#fff;}
 </style>
 </head>
 <body>
@@ -198,7 +202,7 @@ select.fi{appearance:none;-webkit-appearance:none;}
     <div class="saldo-val" id="disp-val">$0</div>
     <div class="saldo-sub">Ingreso menos fijos y gastos registrados</div>
     <div class="saldo-row">
-      <div class="saldo-mini"><div class="saldo-mini-l">Ingreso</div><div class="saldo-mini-v">$2.646.625</div></div>
+      <div class="saldo-mini"><div class="saldo-mini-l">Ingreso</div><div class="saldo-mini-v" id="hdr-ingreso">$2.646.625</div></div>
       <div class="saldo-mini"><div class="saldo-mini-l">Fijos</div><div class="saldo-mini-v">$825.285</div></div>
       <div class="saldo-mini"><div class="saldo-mini-l">Gastado</div><div class="saldo-mini-v" id="gastado-tot">$0</div></div>
     </div>
@@ -208,10 +212,13 @@ select.fi{appearance:none;-webkit-appearance:none;}
 <div class="tabs">
   <button class="tab active" onclick="sTab('resumen')" id="tab-resumen">📊 Resumen</button>
   <button class="tab" onclick="sTab('fijos')" id="tab-fijos">💰 Presupuesto</button>
-  <button class="tab" onclick="sTab('registrar')" id="tab-registrar">➕ Manual</button>
-  <button class="tab" onclick="sTab('importar')" id="tab-importar">📥 Importar</button>
   <button class="tab" onclick="sTab('historial')" id="tab-historial">📋 Historial</button>
   <button class="tab" onclick="sTab('dashboard')" id="tab-dashboard">📈 Dashboard</button>
+</div>
+
+<div class="quick-actions">
+  <button class="quick-btn quick-btn-primary" onclick="sTab('registrar')">Nuevo gasto</button>
+  <button class="quick-btn quick-btn-secondary" onclick="sTab('importar')">Importar cartola</button>
 </div>
 
 <div class="sec active" id="sec-resumen">
@@ -219,7 +226,7 @@ select.fi{appearance:none;-webkit-appearance:none;}
   <div class="card"><div class="card-title">Gastos por categoría — <span id="res-mes-label"></span></div><div id="cat-prog"></div></div>
   <div class="card">
     <div class="card-title">Resumen del mes</div>
-    <div class="fi-item"><span class="fi-nom">Ingreso líquido</span><span class="fi-mon" style="color:var(--green)">$2.646.625</span></div>
+    <div class="fi-item"><span class="fi-nom">Ingreso líquido</span><span class="fi-mon" style="color:var(--green)" id="res-ingreso">$2.646.625</span></div>
     <div class="fi-item"><span class="fi-nom">Compromisos fijos</span><span class="fi-mon" style="color:var(--red)">-$825.285</span></div>
     <div class="fi-item"><span class="fi-nom">Gastos variables</span><span class="fi-mon" id="r-var" style="color:var(--warn)">$0</span></div>
     <div class="fi-item" style="border-top:2px solid var(--border);padding-top:10px;margin-top:4px"><span class="fi-nom" style="font-weight:700">Disponible real</span><span class="fi-mon" id="r-disp" style="font-size:15px"></span></div>
@@ -283,13 +290,14 @@ select.fi{appearance:none;-webkit-appearance:none;}
     <select class="fi" id="fil-cat" onchange="renderHistorial()" style="flex:1;font-size:11px;padding:8px"><option value="">Todas las cat.</option></select>
     <select class="fi" id="fil-mes" onchange="renderHistorial()" style="flex:1;font-size:11px;padding:8px"></select>
   </div>
+  <button class="btn" style="background:var(--bg);color:var(--text);border:1.5px solid var(--border);margin-bottom:12px" onclick="reasignarMesLote()">📅 Mover todos los filtrados a otro mes</button>
   <div class="card"><div class="card-title">Gastos registrados</div><div id="hist-lista"></div></div>
 </div>
 
 <div class="sec" id="sec-fijos">
   <div class="card">
     <div class="card-title">💰 Tu saldo libre</div>
-    <div class="fi-item"><span class="fi-nom">Ingreso líquido</span><span class="fi-mon" style="color:var(--green)">$2.646.625</span></div>
+    <div class="fi-item"><span class="fi-nom">Ingreso líquido</span><span class="fi-mon" style="color:var(--green)" id="fj-ingreso">$2.646.625</span></div>
     <div class="fi-item"><span class="fi-nom">Compromisos fijos</span><span class="fi-mon" style="color:var(--red)" id="fj-total-fijos">-$0</span></div>
     <div class="fi-item"><span class="fi-nom">Presupuesto variable (si gastas justo lo presupuestado)</span><span class="fi-mon" style="color:var(--warn)" id="fj-total-variable">-$0</span></div>
     <div class="fi-item" style="border-top:2px solid var(--border);padding-top:10px;margin-top:4px"><span class="fi-nom" style="font-weight:700">Saldo libre presupuestado</span><span class="fi-mon" id="fj-saldo-libre" style="font-size:15px"></span></div>
@@ -311,7 +319,11 @@ select.fi{appearance:none;-webkit-appearance:none;}
   <div class="card">
     <div class="card-title">✏️ Presupuesto variable — editable</div>
     <div id="pres-editor"></div>
-    <button class="btn" onclick="guardarPresupuestos()">💾 Guardar presupuestos</button>
+    <div class="fg">
+      <label class="fl">Ingreso líquido</label>
+      <input type="number" class="fi" id="ingreso-input" value="2646625">
+    </div>
+    <button class="btn" onclick="guardarPresupuestos()">💾 Guardar cambios</button>
     <div class="fi-item" style="font-weight:700;border-top:2px solid var(--border);padding-top:10px;margin-top:10px"><span>Total variable</span><span id="pres-editor-total">$0</span></div>
   </div>
   <div class="card">
@@ -325,18 +337,20 @@ select.fi{appearance:none;-webkit-appearance:none;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const INGRESO=2646625,FIJOS=825285;
+let INGRESO=2646625;
+const FIJOS=825285;
 const MESES_N=['Enero','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const SYNC_CFG_KEY='gh_isaac_sync_cfg';
 const LOCAL_CACHE_KEY='gastos_isaac_final';
 const PRES_CACHE_KEY='gh_isaac_presupuestos';
+const INGRESO_CACHE_KEY='gh_isaac_ingreso';
 
 const CATS={
-  'Alimentación':{pres:813000,em:'🍽',color:'#2D6A4F',ej:['🛒 Supermercado','🥩 Carnicería','🍞 Pan y panadería','🏪 Feria semanal'],tip:'Tu categoría más grande — $813.000/mes. Delivery y restaurantes van en "Salidas y Delivery".'},
+  'Alimentación':{pres:813000,em:'🍽',color:'#1C3D2E',ej:['🛒 Supermercado','🥩 Carnicería','🍞 Pan y panadería','🏪 Feria semanal'],tip:'Tu categoría más grande — $813.000/mes. Delivery y restaurantes van en "Salidas y Delivery".'},
   'Salidas y Delivery':{pres:50000,em:'🍕',color:'#8E44AD',ej:['🍕 Delivery (Uber Eats, Rappi)','🍽 Restaurantes','🍔 Comida rápida'],tip:'Presupuesto separado para comer fuera o pedir delivery — $50.000/mes.'},
   'Cuentas Casa':{pres:305854,em:'🏠',color:'#6366F1',ej:['💡 Enel (luz)','💧 Smapa (agua)','📡 WOM Fibra (tu mitad)','📺 DirecTV (tu mitad)','🔥 Gas','📱 Entel','🔧 Reparaciones','🧹 Artículos limpieza'],tip:'Incluye cuentas del hogar, incluyendo Entel.'},
   'Transporte':{pres:145000,em:'🚗',color:'#7a4800',ej:['⛽ Bencina','🛣 Autopistas (TAG/CSM)','🅿️ Estacionamientos','🔧 Mantención auto','🚕 Uber/Taxi'],tip:'Autopistas base $50.000 — varía según rutina.'},
-  'Salud':{pres:40000,em:'💊',color:'#C0392B',ej:['💊 Farmacia (Ahumada, Cruz Verde)','👨‍⚕️ Consultas (copago)','🦷 Dentista','👓 Óptica'],tip:'Solo copagos y gastos no cubiertos por Banmédica.'},
+  'Salud':{pres:40000,em:'💊',color:'#B54A3F',ej:['💊 Farmacia (Ahumada, Cruz Verde)','👨‍⚕️ Consultas (copago)','🦷 Dentista','👓 Óptica'],tip:'Solo copagos y gastos no cubiertos por Banmédica.'},
   'Ocio':{pres:81600,em:'🎬',color:'#E67E22',ej:['🎬 Cine/entradas','🍽 Salidas a comer','🎮 Videojuegos','🏕 Actividades fin de semana','🎂 Cumpleaños','🎁 Regalos familia'],tip:'Incluye ocio, entretenimiento y gastos familiares eventuales.'},
   'Ahorro/Reserva':{pres:30861,em:'💰',color:'#27AE60',ej:['🎄 Reserva diciembre ($30.861 ago–nov)'],tip:'Meta mínima: $30.861/mes. El ahorro Daniel es automático — está en Fijos.'},
   'Otros':{pres:60000,em:'📦',color:'#888',ej:['🛍 Compras no planeadas','🎁 Regalos','📝 Trámites','🔑 Imprevistos'],tip:'Para lo que no encaja en otra categoría.'},
@@ -398,7 +412,7 @@ async function crearBinNuevo(masterKey){
   const res=await fetch('https://api.jsonbin.io/v3/b',{
     method:'POST',
     headers:{'Content-Type':'application/json','X-Master-Key':masterKey,'X-Bin-Private':'true','X-Bin-Versioning':'false','X-Bin-Name':'gh_isaac_gastos'},
-    body:JSON.stringify({gastos:gastos,updatedAt:new Date().toISOString()})
+    body:JSON.stringify({gastos:gastos,presupuestos:presupuestosCustom,ingreso:INGRESO,updatedAt:new Date().toISOString()})
   });
   if(!res.ok)throw new Error('http '+res.status);
   const json=await res.json();
@@ -414,10 +428,12 @@ async function syncPull(){
     const json=await res.json();
     gastos=(json.record&&json.record.gastos)?json.record.gastos:[];
     presupuestosCustom=(json.record&&json.record.presupuestos)?json.record.presupuestos:{};
+    if(json.record&&typeof json.record.ingreso==='number'&&json.record.ingreso>0)INGRESO=json.record.ingreso;
     aplicarPresupuestosCustom();
     try{
       localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));
       localStorage.setItem(PRES_CACHE_KEY,JSON.stringify(presupuestosCustom));
+      localStorage.setItem(INGRESO_CACHE_KEY,String(INGRESO));
     }catch(e){}
     setSyncStatus('ok');
     return true;
@@ -434,7 +450,7 @@ async function syncPush(){
     const res=await fetch(`https://api.jsonbin.io/v3/b/${syncCfg.binId}`,{
       method:'PUT',
       headers:{'Content-Type':'application/json','X-Master-Key':syncCfg.masterKey,'X-Bin-Versioning':'false'},
-      body:JSON.stringify({gastos:gastos,presupuestos:presupuestosCustom,updatedAt:new Date().toISOString()})
+      body:JSON.stringify({gastos:gastos,presupuestos:presupuestosCustom,ingreso:INGRESO,updatedAt:new Date().toISOString()})
     });
     if(!res.ok)throw new Error('http '+res.status);
     setSyncStatus('ok');
@@ -507,6 +523,10 @@ async function cargarDatos(){
     const localPres=localStorage.getItem(PRES_CACHE_KEY);
     if(localPres)presupuestosCustom=JSON.parse(localPres);
   }catch(e){}
+  try{
+    const localIngreso=localStorage.getItem(INGRESO_CACHE_KEY);
+    if(localIngreso&&parseFloat(localIngreso)>0)INGRESO=parseFloat(localIngreso);
+  }catch(e){}
   aplicarPresupuestosCustom();
   if(syncCfg&&syncCfg.masterKey&&syncCfg.binId){
     await syncPull();
@@ -520,6 +540,7 @@ function save(){
   try{
     localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));
     localStorage.setItem(PRES_CACHE_KEY,JSON.stringify(presupuestosCustom));
+    localStorage.setItem(INGRESO_CACHE_KEY,String(INGRESO));
   }catch(e){}
   syncPush();
 }
@@ -528,6 +549,7 @@ function saveDebouncado(){
   try{
     localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));
     localStorage.setItem(PRES_CACHE_KEY,JSON.stringify(presupuestosCustom));
+    localStorage.setItem(INGRESO_CACHE_KEY,String(INGRESO));
   }catch(e){}
   if(saveTimeout)clearTimeout(saveTimeout);
   saveTimeout=setTimeout(syncPush,1500);
@@ -543,10 +565,11 @@ document.getElementById('mes-pill').textContent=MESES_N[ahora.getMonth()]+' '+ah
 function getMesKey(offset=0){const d=new Date(ahora.getFullYear(),ahora.getMonth()-offset,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function getMesNombre(offset=0){const d=new Date(ahora.getFullYear(),ahora.getMonth()-offset,1);return MESES_N[d.getMonth()]+' '+d.getFullYear();}
 function getMesNombreFromKey(k){const p=k.split('-');return MESES_N[parseInt(p[1])-1]+' '+p[0];}
-function gastosDeMes(key){return gastos.filter(g=>g.fecha.startsWith(key));}
+function mesDe(g){return g.mesContable||g.fecha.slice(0,7);}
+function gastosDeMes(key){return gastos.filter(g=>mesDe(g)===key);}
 function totMes(key){return gastosDeMes(key).reduce((s,g)=>s+g.monto,0);}
 function totCatMes(key){const t={};Object.keys(CATS).forEach(c=>t[c]=0);gastosDeMes(key).forEach(g=>{const cat=normalizarCat(g.cat);t[cat]=(t[cat]||0)+g.monto;});return t;}
-function getMesesConDatos(){const keys=new Set(gastos.map(g=>g.fecha.slice(0,7)));return [...keys].sort();}
+function getMesesConDatos(){const keys=new Set(gastos.map(g=>mesDe(g)));return [...keys].sort();}
 
 function updateHdr(){
   const tot=totMes(getMesKey(0));
@@ -555,6 +578,9 @@ function updateHdr(){
   el.textContent=fmt(disp);
   el.style.color=disp<100000?'#FFB347':'white';
   document.getElementById('gastado-tot').textContent=fmt(tot);
+  document.getElementById('hdr-ingreso').textContent=fmt(INGRESO);
+  const resIngresoEl=document.getElementById('res-ingreso');
+  if(resIngresoEl)resIngresoEl.textContent=fmt(INGRESO);
 }
 
 function renderResumen(){
@@ -590,7 +616,7 @@ function renderTendencia(){
   const meses=getMesesConDatos().slice(-6);if(!meses.length)return;
   const labels=meses.map(k=>{const p=k.split('-');return MESES_N[parseInt(p[1])-1];});
   if(chartT){chartT.destroy();}
-  chartT=new Chart(document.getElementById('chart-tendencia'),{type:'line',data:{labels,datasets:[{label:'Gasto total',data:meses.map(k=>totMes(k)),borderColor:'#2D6A4F',backgroundColor:'rgba(45,106,79,.1)',tension:.4,pointRadius:5,pointBackgroundColor:'#2D6A4F',fill:true},{label:'Presupuesto',data:meses.map(()=>1526315),borderColor:'#C0392B',borderDash:[4,4],pointRadius:0,fill:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K',font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}});
+  chartT=new Chart(document.getElementById('chart-tendencia'),{type:'line',data:{labels,datasets:[{label:'Gasto total',data:meses.map(k=>totMes(k)),borderColor:'#1C3D2E',backgroundColor:'rgba(28,61,46,.1)',tension:.4,pointRadius:5,pointBackgroundColor:'#1C3D2E',fill:true},{label:'Presupuesto',data:meses.map(()=>1526315),borderColor:'#B54A3F',borderDash:[4,4],pointRadius:0,fill:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K',font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}});
 }
 
 function renderCatCompare(kA,kB){
@@ -629,6 +655,7 @@ function mostrarPreview(items,fuente){
   const id=fuente==='BCI'?'preview-bci':fuente==='Falabella'?'preview-fal':'preview-sp';
   let html=`<div class="al al-${nuevos.length>0?'blue':'green'}" style="margin-top:8px"><span>${nuevos.length>0?'📋':'✅'}</span><div>${nuevos.length} nuevos · ${dups} ya registrados</div></div>`;
   if(nuevos.length>0){
+    html+=`<div class="fg" style="margin-top:8px"><label class="fl">Asignar todos al mes contable (déjalo vacío para usar la fecha real)</label><input type="month" class="fi" id="mes-override-${id}"></div>`;
     html+=`<div style="display:flex;gap:6px;margin:8px 0"><button onclick="toggleAllImport('${id}',true)" style="flex:1;font-size:10px;padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer">☑ Todos</button><button onclick="toggleAllImport('${id}',false)" style="flex:1;font-size:10px;padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer">☐ Ninguno</button></div>`;
     html+=nuevos.map((it,idx)=>`<div class="preview-item"><input type="checkbox" checked data-idx="${idx}" class="import-check-${id.replace(/[^a-z0-9]/gi,'')}" onchange="toggleImportItem(${idx},this)" style="margin-right:8px;width:16px;height:16px;flex-shrink:0"><div style="flex:1;margin-right:6px"><div class="pd-name">${it.desc}</div><div class="pd-meta">${it.fecha} · <select onchange="pendingImport[${idx}].cat=this.value" style="font-size:10px;border:1px solid var(--border);border-radius:4px;padding:1px 3px;background:var(--bg)">${Object.keys(CATS).map(c=>`<option value="${c}"${c===it.cat?' selected':''}>${CATS[c].em} ${c}</option>`).join('')}</select></div></div><div class="preview-monto">${fmt(it.monto)}</div></div>`).join('');
     html+=`<button class="btn" onclick="confirmar('${fuente}')" style="margin-top:10px">✅ Importar seleccionados</button>`;
@@ -650,6 +677,8 @@ function toggleAllImport(id,state){
 function confirmar(fuente){
   const id=fuente==='BCI'?'preview-bci':fuente==='Falabella'?'preview-fal':'preview-sp';
   const cont=document.getElementById(id);
+  const mesOverrideEl=document.getElementById('mes-override-'+id);
+  const mesOverride=mesOverrideEl&&mesOverrideEl.value?mesOverrideEl.value:null;
   const seleccionados=[];
   cont.querySelectorAll('input[type="checkbox"][data-idx]').forEach(cb=>{
     if(cb.checked){
@@ -658,7 +687,7 @@ function confirmar(fuente){
       if(it)seleccionados.push(it);
     }
   });
-  seleccionados.forEach(it=>gastos.unshift({id:Date.now()+Math.random(),desc:it.desc,monto:it.monto,cat:it.cat,fecha:it.fecha,fuente:it.fuente||fuente}));
+  seleccionados.forEach(it=>gastos.unshift({id:Date.now()+Math.random(),desc:it.desc,monto:it.monto,cat:it.cat,fecha:it.fecha,mesContable:mesOverride||it.fecha.slice(0,7),fuente:it.fuente||fuente}));
   save();showToast(`✅ ${seleccionados.length} gastos importados`);
   updateHdr();renderResumen();renderHistorial();renderDashboard();
   pendingImport=[];
@@ -669,9 +698,42 @@ function renderHistorial(){
   const ff=document.getElementById('fil-fuente').value;const fc=document.getElementById('fil-cat').value;const fm=document.getElementById('fil-mes').value;
   let lista=gastos;
   if(ff)lista=lista.filter(g=>g.fuente===ff);if(fc)lista=lista.filter(g=>g.cat===fc);
-  if(fm)lista=lista.filter(g=>g.fecha.startsWith(fm));else lista=lista.filter(g=>g.fecha.startsWith(getMesKey(0)));
+  if(fm)lista=lista.filter(g=>mesDe(g)===fm);else lista=lista.filter(g=>mesDe(g)===getMesKey(0));
   if(!lista.length){document.getElementById('hist-lista').innerHTML='<div class="empty">Sin gastos en este período.</div>';return;}
-  document.getElementById('hist-lista').innerHTML=lista.map(g=>`<div class="gi"><div class="gi-l"><div class="gi-em">${CATS[normalizarCat(g.cat)]?.em||'📦'}</div><div><div class="gi-desc">${g.desc}<span class="gi-src">${g.fuente||'Manual'}</span></div><div class="gi-meta">${normalizarCat(g.cat)} · ${g.fecha}</div></div></div><div style="display:flex;align-items:center;gap:5px"><div class="gi-monto">${fmt(g.monto)}</div><button class="btn-del" onclick="delG(${g.id})">×</button></div></div>`).join('');
+  document.getElementById('hist-lista').innerHTML=lista.map(g=>{
+    const reasignado=g.mesContable&&g.mesContable!==g.fecha.slice(0,7);
+    return `<div class="gi"><div class="gi-l"><div class="gi-em">${CATS[normalizarCat(g.cat)]?.em||'📦'}</div><div><div class="gi-desc">${g.desc}<span class="gi-src">${g.fuente||'Manual'}</span></div><div class="gi-meta">${normalizarCat(g.cat)} · ${g.fecha}${reasignado?` <span style="color:var(--blue)">↪ mes: ${getMesNombreFromKey(g.mesContable)}</span>`:''}</div></div></div><div style="display:flex;align-items:center;gap:5px"><div class="gi-monto">${fmt(g.monto)}</div><button class="btn-del" onclick="reasignarMes(${g.id})" title="Reasignar mes">📅</button><button class="btn-del" onclick="delG(${g.id})">×</button></div></div>`;
+  }).join('');
+}
+
+function reasignarMes(id){
+  const g=gastos.find(x=>x.id===id);
+  if(!g)return;
+  const actual=mesDe(g);
+  const nuevo=prompt('¿A qué mes contable pertenece este gasto?\nFormato AAAA-MM (ej: 2026-07 para Julio 2026)',actual);
+  if(!nuevo)return;
+  const v=nuevo.trim();
+  if(!/^\d{4}-\d{2}$/.test(v)){showToast('Formato inválido, usa AAAA-MM');return;}
+  g.mesContable=v;
+  saveDebouncado();
+  updateHdr();renderResumen();renderHistorial();renderDashboard();actualizarFiltroMes();
+  showToast('✅ Mes actualizado');
+}
+
+function reasignarMesLote(){
+  const ff=document.getElementById('fil-fuente').value;const fc=document.getElementById('fil-cat').value;const fm=document.getElementById('fil-mes').value;
+  let lista=gastos;
+  if(ff)lista=lista.filter(g=>g.fuente===ff);if(fc)lista=lista.filter(g=>g.cat===fc);
+  if(fm)lista=lista.filter(g=>mesDe(g)===fm);else lista=lista.filter(g=>mesDe(g)===getMesKey(0));
+  if(!lista.length){showToast('No hay gastos visibles con estos filtros');return;}
+  const nuevo=prompt(`Vas a mover ${lista.length} gasto(s) a otro mes contable.\nFormato AAAA-MM (ej: 2026-07 para Julio 2026)`,getMesKey(0));
+  if(!nuevo)return;
+  const v=nuevo.trim();
+  if(!/^\d{4}-\d{2}$/.test(v)){showToast('Formato inválido, usa AAAA-MM');return;}
+  lista.forEach(g=>g.mesContable=v);
+  saveDebouncado();
+  updateHdr();renderResumen();renderHistorial();renderDashboard();actualizarFiltroMes();
+  showToast(`✅ ${lista.length} gastos movidos a ${getMesNombreFromKey(v)}`);
 }
 
 function actualizarFiltroMes(){
@@ -690,7 +752,7 @@ function regGasto(){
   const desc=document.getElementById('in-desc').value.trim();const monto=parseFloat(document.getElementById('in-monto').value);
   if(!desc||!monto||monto<=0){showToast('Completa descripción y monto');return;}
   const hoy=new Date().toISOString().split('T')[0];
-  gastos.unshift({id:Date.now(),desc,monto,cat:catSel,fecha:hoy,fuente:'Manual'});
+  gastos.unshift({id:Date.now(),desc,monto,cat:catSel,fecha:hoy,mesContable:hoy.slice(0,7),fuente:'Manual'});
   saveDebouncado();document.getElementById('in-desc').value='';document.getElementById('in-monto').value='';
   showToast('✅ Registrado');updateHdr();renderResumen();renderHistorial();actualizarFiltroMes();
 }
@@ -711,6 +773,7 @@ function totalVariablePres(){return Object.values(CATS).reduce((s,d)=>s+d.pres,0
 
 function renderFijosResumen(){
   const tv=totalVariablePres();
+  document.getElementById('fj-ingreso').textContent=fmt(INGRESO);
   document.getElementById('fj-total-fijos').textContent='-'+fmt(FIJOS);
   document.getElementById('fj-total-variable').textContent='-'+fmt(tv);
   document.getElementById('pres-editor-total').textContent=fmt(tv);
@@ -718,6 +781,8 @@ function renderFijosResumen(){
   const el=document.getElementById('fj-saldo-libre');
   el.textContent=fmt(libre);
   el.style.color=libre<0?'var(--red)':libre<150000?'var(--warn)':'var(--green)';
+  const ingresoInput=document.getElementById('ingreso-input');
+  if(ingresoInput&&document.activeElement!==ingresoInput)ingresoInput.value=INGRESO;
 }
 
 function renderPresEditor(){
@@ -739,10 +804,18 @@ function guardarPresupuestos(){
       changed=true;
     }
   });
+  const ingresoEl=document.getElementById('ingreso-input');
+  if(ingresoEl){
+    const v=parseFloat(ingresoEl.value);
+    if(!isNaN(v)&&v>0&&v!==INGRESO){
+      INGRESO=v;
+      changed=true;
+    }
+  }
   if(!changed){showToast('Sin cambios');return;}
   saveDebouncado();
-  showToast('✅ Presupuestos actualizados');
-  renderFijosResumen();renderResumen();renderDashboard();
+  showToast('✅ Cambios guardados');
+  updateHdr();renderFijosResumen();renderResumen();renderDashboard();
 }
 
 function analizarPresupuesto(){
@@ -779,7 +852,8 @@ function sTab(n){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('sec-'+n).classList.add('active');
-  document.getElementById('tab-'+n).classList.add('active');
+  const tabBtn=document.getElementById('tab-'+n);
+  if(tabBtn)tabBtn.classList.add('active');
   if(n==='resumen')renderResumen();if(n==='dashboard')renderDashboard();
   if(n==='historial'){actualizarFiltroMes();renderHistorial();}
   if(n==='fijos'){renderFijosResumen();renderPresEditor();}
