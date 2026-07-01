@@ -146,9 +146,11 @@ select.fi{appearance:none;-webkit-appearance:none;}
 .quick-btn{flex:1;padding:13px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Inter',sans-serif;-webkit-appearance:none;}
 .quick-btn-primary{background:var(--green);color:#fff;}
 .quick-btn-secondary{background:var(--green);color:#fff;}
+.ptr-indicator{position:fixed;top:calc(-40px + var(--safe-top));left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;z-index:150;transition:top .15s ease;white-space:nowrap;}
 </style>
 </head>
 <body>
+<div class="ptr-indicator" id="ptr-indicator">↓ Suelta para sincronizar</div>
 <div class="toast" id="toast"></div>
 <div class="sync-indicator" id="sync-indicator">💾 Guardando...</div>
 
@@ -192,6 +194,7 @@ select.fi{appearance:none;-webkit-appearance:none;}
     <div><div style="font-size:13px;opacity:.75">Hola,</div><div class="hdr-nombre">Isaac 👋</div><div class="hdr-fecha" id="hdr-fecha"></div></div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
       <div style="display:flex;gap:6px;align-items:center">
+        <button class="icon-btn" onclick="syncManual()" title="Sincronizar ahora">🔄</button>
         <button class="icon-btn" onclick="abrirSyncMo()" title="Sincronización">⚙️</button>
         <div class="mes-pill" id="mes-pill"></div>
       </div>
@@ -415,7 +418,11 @@ async function crearBinNuevo(masterKey){
     headers:{'Content-Type':'application/json','X-Master-Key':masterKey,'X-Bin-Private':'true','X-Bin-Versioning':'false','X-Bin-Name':'gh_isaac_gastos'},
     body:JSON.stringify({gastos:gastos,presupuestos:presupuestosCustom,ingreso:INGRESO,updatedAt:new Date().toISOString()})
   });
-  if(!res.ok)throw new Error('http '+res.status);
+  if(!res.ok){
+    let msg='HTTP '+res.status;
+    try{const j=await res.json();if(j&&j.message)msg=j.message;}catch(e){}
+    throw new Error(msg);
+  }
   const json=await res.json();
   return json.metadata.id;
 }
@@ -463,8 +470,8 @@ async function syncPush(){
 }
 
 async function guardarSyncCfg(){
-  const mk=document.getElementById('sync-mk').value.trim();
-  let bid=document.getElementById('sync-bid').value.trim();
+  const mk=document.getElementById('sync-mk').value.trim().replace(/^["']+|["']+$/g,'');
+  let bid=document.getElementById('sync-bid').value.trim().replace(/^["']+|["']+$/g,'');
   if(!mk){showToast('Ingresa tu Master Key');return;}
   try{
     if(!bid){
@@ -480,7 +487,7 @@ async function guardarSyncCfg(){
     await syncPull();
     updateHdr();renderResumen();renderHistorial();renderDashboard();actualizarFiltroMes();
   }catch(e){
-    showToast('❌ Error: revisa tu Master Key');
+    showToast('❌ '+(e.message||'Error al configurar sincronización'));
   }
 }
 
@@ -896,6 +903,35 @@ function inicializar(){
 
 // Iniciar cargando datos desde storage persistente
 cargarDatos();
+
+// ============ PULL-TO-REFRESH ============
+(function(){
+  let startY=0,pulling=false,triggered=false;
+  const ind=document.getElementById('ptr-indicator');
+  const UMBRAL=70;
+  document.addEventListener('touchstart',e=>{
+    if(window.scrollY<=0){startY=e.touches[0].clientY;pulling=true;triggered=false;}
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!pulling)return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy>0&&window.scrollY<=0){
+      const top=Math.min(dy-40,20);
+      ind.style.top=(top+parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')||0))+'px';
+      ind.textContent=dy>UMBRAL?'↑ Suelta para sincronizar':'↓ Sigue bajando';
+      triggered=dy>UMBRAL;
+    }
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(pulling&&triggered){
+      ind.textContent='☁️ Sincronizando...';
+      syncManual().finally(()=>{ind.style.top='-40px';});
+    }else{
+      ind.style.top='-40px';
+    }
+    pulling=false;triggered=false;
+  },{passive:true});
+})();
 </script>
 </body>
 </html>
