@@ -55,6 +55,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);max-w
 .prog-ok{background:var(--green);}
 .prog-warn{background:var(--warn);}
 .prog-over{background:var(--red);}
+.prog-neutral{background:var(--text2);}
 .cat-pct{font-size:10px;margin-top:2px;}
 .fg{margin-bottom:12px;}
 .fl{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.3px;}
@@ -352,7 +353,7 @@ const CATS={
   'Transporte':{pres:145000,em:'🚗',color:'#7a4800',ej:['⛽ Bencina','🛣 Autopistas (TAG/CSM)','🅿️ Estacionamientos','🔧 Mantención auto','🚕 Uber/Taxi'],tip:'Autopistas base $50.000 — varía según rutina.'},
   'Salud':{pres:40000,em:'💊',color:'#B54A3F',ej:['💊 Farmacia (Ahumada, Cruz Verde)','👨‍⚕️ Consultas (copago)','🦷 Dentista','👓 Óptica'],tip:'Solo copagos y gastos no cubiertos por Banmédica.'},
   'Ocio':{pres:81600,em:'🎬',color:'#E67E22',ej:['🎬 Cine/entradas','🍽 Salidas a comer','🎮 Videojuegos','🏕 Actividades fin de semana','🎂 Cumpleaños','🎁 Regalos familia'],tip:'Incluye ocio, entretenimiento y gastos familiares eventuales.'},
-  'Ahorro/Reserva':{pres:30861,em:'💰',color:'#27AE60',ej:['🎄 Reserva diciembre ($30.861 ago–nov)'],tip:'Meta mínima: $30.861/mes. El ahorro Daniel es automático — está en Fijos.'},
+  'Ahorro/Reserva':{pres:30861,em:'💰',color:'#27AE60',esMeta:true,ej:['🎄 Reserva diciembre ($30.861 ago–nov)'],tip:'Meta mínima: $30.861/mes. El ahorro Daniel es automático — está en Fijos.'},
   'Otros':{pres:60000,em:'📦',color:'#888',ej:['🛍 Compras no planeadas','🎁 Regalos','📝 Trámites','🔑 Imprevistos'],tip:'Para lo que no encaja en otra categoría.'},
 };
 
@@ -588,11 +589,31 @@ function renderResumen(){
   document.getElementById('res-mes-label').textContent=getMesNombre(0);
   const tots=totCatMes(k);const totalV=totMes(k);
   let als='';
-  Object.entries(tots).forEach(([c,g])=>{const p=CATS[c].pres,pct=p?g/p*100:0;if(pct>=100)als+=`<div class="al al-red"><span class="al-icon">🚨</span><div><strong>${c}</strong> excedido — ${fmt(g)} de ${fmt(p)}</div></div>`;else if(pct>=80)als+=`<div class="al al-warn"><span class="al-icon">⚠️</span><div><strong>${c}</strong> al ${Math.round(pct)}% — quedan ${fmt(p-g)}</div></div>`;});
+  Object.entries(tots).forEach(([c,g])=>{
+    const d=CATS[c],p=d.pres,pct=p?g/p*100:0;
+    if(d.esMeta){
+      if(pct>=100)als+=`<div class="al al-green"><span class="al-icon">🎉</span><div><strong>${c}</strong> meta cumplida — ${fmt(g)} ahorrados</div></div>`;
+    }else{
+      if(pct>=100)als+=`<div class="al al-red"><span class="al-icon">🚨</span><div><strong>${c}</strong> excedido — ${fmt(g)} de ${fmt(p)}</div></div>`;
+      else if(pct>=80)als+=`<div class="al al-warn"><span class="al-icon">⚠️</span><div><strong>${c}</strong> al ${Math.round(pct)}% — quedan ${fmt(p-g)}</div></div>`;
+    }
+  });
   if(!als)als=`<div class="al al-green"><span class="al-icon">✅</span><div>Todo dentro del presupuesto este mes</div></div>`;
   document.getElementById('alertas').innerHTML=als;
   let prog='';
-  Object.entries(CATS).forEach(([c,d])=>{const g=tots[c]||0,pct=Math.min(100,Math.round(g/d.pres*100));const cls=pct>=100?'prog-over':pct>=80?'prog-warn':'prog-ok';const col=pct>=100?'var(--red)':pct>=80?'var(--warn)':'var(--green)';prog+=`<div class="cat-row"><div class="cat-top"><div class="cat-name">${d.em} ${c}</div><div class="cat-amt">${fmt(g)} <b>/ ${fmt(d.pres)}</b></div></div><div class="prog"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div><div class="cat-pct" style="color:${col}">${pct}% usado${pct>=100?' ⚠️':''}</div></div>`;});
+  Object.entries(CATS).forEach(([c,d])=>{
+    const g=tots[c]||0,pctReal=Math.round(g/d.pres*100),pct=Math.min(100,pctReal);
+    let cls,col;
+    if(d.esMeta){
+      cls=pctReal>=80?'prog-ok':'prog-neutral';
+      col=pctReal>=80?'var(--green)':'var(--text2)';
+    }else{
+      cls=pct>=100?'prog-over':pct>=80?'prog-warn':'prog-ok';
+      col=pct>=100?'var(--red)':pct>=80?'var(--warn)':'var(--green)';
+    }
+    const icono=d.esMeta?(pctReal>=100?' 🎉':''):(pct>=100?' ⚠️':'');
+    prog+=`<div class="cat-row"><div class="cat-top"><div class="cat-name">${d.em} ${c}</div><div class="cat-amt">${fmt(g)} <b>/ ${fmt(d.pres)}</b></div></div><div class="prog"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div><div class="cat-pct" style="color:${col}">${pctReal}% ${d.esMeta?'ahorrado':'usado'}${icono}</div></div>`;
+  });
   document.getElementById('cat-prog').innerHTML=prog;
   document.getElementById('r-var').textContent='-'+fmt(totalV);
   const disp=INGRESO-FIJOS-totalV;const el=document.getElementById('r-disp');el.textContent=fmt(disp);el.style.color=disp<0?'var(--red)':disp<200000?'var(--warn)':'var(--green)';
