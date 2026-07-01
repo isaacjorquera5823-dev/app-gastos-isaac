@@ -266,19 +266,19 @@ select.fi{appearance:none;-webkit-appearance:none;}
   <div class="al al-blue"><span class="al-icon">💡</span><div>Importa tu cartola BCI o Falabella. La app categoriza automáticamente y detecta duplicados.</div></div>
   <div class="card">
     <div class="card-title">📥 Cartola BCI</div>
-    <div class="import-zone" onclick="document.getElementById('file-bci').click()"><div class="iz-icon">🏦</div><div class="iz-title">Subir cartola BCI</div><div class="iz-sub">Archivo .xls desde BCI app</div></div>
+    <div class="import-zone" onclick="document.getElementById('file-bci').value='';document.getElementById('file-bci').click()"><div class="iz-icon">🏦</div><div class="iz-title">Subir cartola BCI</div><div class="iz-sub">Archivo .xls desde BCI app</div></div>
     <input type="file" class="import-input" id="file-bci" accept=".xls,.xlsx" onchange="importar(this,'BCI')">
     <div id="preview-bci"></div>
   </div>
   <div class="card">
     <div class="card-title">📥 Cartola Falabella (esposa)</div>
-    <div class="import-zone" onclick="document.getElementById('file-fal').click()"><div class="iz-icon">👩</div><div class="iz-title">Subir cartola Falabella</div><div class="iz-sub">Archivo Excel desde Banco Falabella</div></div>
+    <div class="import-zone" onclick="document.getElementById('file-fal').value='';document.getElementById('file-fal').click()"><div class="iz-icon">👩</div><div class="iz-title">Subir cartola Falabella</div><div class="iz-sub">Archivo Excel desde Banco Falabella</div></div>
     <input type="file" class="import-input" id="file-fal" accept=".xls,.xlsx" onchange="importar(this,'Falabella')">
     <div id="preview-fal"></div>
   </div>
   <div class="card">
     <div class="card-title">📥 Comprobante Servipag</div>
-    <div class="import-zone" onclick="document.getElementById('file-sp').click()"><div class="iz-icon">⚡</div><div class="iz-title">Subir comprobante Servipag</div><div class="iz-sub">Archivo .xls historial de pagos</div></div>
+    <div class="import-zone" onclick="document.getElementById('file-sp').value='';document.getElementById('file-sp').click()"><div class="iz-icon">⚡</div><div class="iz-title">Subir comprobante Servipag</div><div class="iz-sub">Archivo .xls historial de pagos</div></div>
     <input type="file" class="import-input" id="file-sp" accept=".xls,.xlsx" onchange="importarServipag(this)">
     <div id="preview-sp"></div>
   </div>
@@ -659,8 +659,14 @@ function mostrarPreview(items,fuente){
     html+=`<div style="display:flex;gap:6px;margin:8px 0"><button onclick="toggleAllImport('${id}',true)" style="flex:1;font-size:10px;padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer">☑ Todos</button><button onclick="toggleAllImport('${id}',false)" style="flex:1;font-size:10px;padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer">☐ Ninguno</button></div>`;
     html+=nuevos.map((it,idx)=>`<div class="preview-item"><input type="checkbox" checked data-idx="${idx}" class="import-check-${id.replace(/[^a-z0-9]/gi,'')}" onchange="toggleImportItem(${idx},this)" style="margin-right:8px;width:16px;height:16px;flex-shrink:0"><div style="flex:1;margin-right:6px"><div class="pd-name">${it.desc}</div><div class="pd-meta">${it.fecha} · <select onchange="pendingImport[${idx}].cat=this.value" style="font-size:10px;border:1px solid var(--border);border-radius:4px;padding:1px 3px;background:var(--bg)">${Object.keys(CATS).map(c=>`<option value="${c}"${c===it.cat?' selected':''}>${CATS[c].em} ${c}</option>`).join('')}</select></div></div><div class="preview-monto">${fmt(it.monto)}</div></div>`).join('');
     html+=`<button class="btn" onclick="confirmar('${fuente}')" style="margin-top:10px">✅ Importar seleccionados</button>`;
+    html+=`<button class="btn" style="background:var(--bg);color:var(--text2);border:1.5px solid var(--border);margin-top:8px" onclick="cancelarImport('${id}')">✕ Cancelar</button>`;
   }
   document.getElementById(id).innerHTML=html;
+}
+
+function cancelarImport(id){
+  pendingImport=[];
+  document.getElementById(id).innerHTML='';
 }
 
 function toggleImportItem(idx,checkboxEl){
