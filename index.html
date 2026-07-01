@@ -137,6 +137,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);max-w
 .empty{text-align:center;padding:28px;color:var(--text2);font-size:13px;}
 .sync-indicator{position:fixed;bottom:calc(80px + var(--safe-bottom));right:16px;background:var(--green);color:#fff;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;z-index:100;display:none;opacity:.9;}
 select.fi{appearance:none;-webkit-appearance:none;}
+.icon-btn{background:rgba(255,255,255,.2);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;flex-shrink:0;}
+.sync-badge{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:600;margin-top:4px;display:inline-block;}
+.sync-badge.on{background:rgba(255,255,255,.2);color:#fff;}
+.sync-badge.off{background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);}
 </style>
 </head>
 <body>
@@ -153,10 +157,41 @@ select.fi{appearance:none;-webkit-appearance:none;}
   </div>
 </div>
 
+<div class="mo" id="sync-mo" onclick="cSyncMo(event)">
+  <div class="mo-box">
+    <div class="mo-hdr">
+      <div><div class="mo-em">☁️</div><div class="mo-title">Sincronizar entre dispositivos</div></div>
+      <button class="mo-close" onclick="closeSyncMo()">×</button>
+    </div>
+    <div class="al al-blue" style="margin-bottom:12px;line-height:1.6">
+      <span class="al-icon">💡</span>
+      <div>
+        1. Crea una cuenta gratis en <b>jsonbin.io</b><br>
+        2. Copia tu <b>X-MASTER-KEY</b> en jsonbin.io/api-keys<br>
+        3. Pégala abajo. En tu <b>primer</b> dispositivo deja "ID del Bin" vacío — se crea solo.<br>
+        4. En el <b>segundo</b> dispositivo, pega la misma Master Key y el ID del Bin generado.
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Master Key</label><input type="text" class="fi" id="sync-mk" placeholder="$2a$10$..."></div>
+    <div class="fg"><label class="fl">ID del Bin (vacío = crear nuevo)</label><input type="text" class="fi" id="sync-bid" placeholder="Déjalo vacío la primera vez"></div>
+    <button class="btn" onclick="guardarSyncCfg()">Guardar y sincronizar</button>
+    <button class="btn" style="background:var(--bg);color:var(--text);border:1.5px solid var(--border);margin-top:8px" onclick="syncManual()">🔄 Sincronizar ahora</button>
+    <div id="sync-info" style="display:none;margin-top:12px;padding:10px;background:var(--green-l);border-radius:var(--rs);font-size:11px;color:var(--green);line-height:1.5">
+      ID del Bin (cópialo para tu otro dispositivo):<br><b id="sync-bid-display"></b>
+    </div>
+  </div>
+</div>
+
 <div class="hdr">
   <div class="hdr-top">
     <div><div style="font-size:13px;opacity:.75">Hola,</div><div class="hdr-nombre">Isaac 👋</div><div class="hdr-fecha" id="hdr-fecha"></div></div>
-    <div class="mes-pill" id="mes-pill"></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="icon-btn" onclick="abrirSyncMo()" title="Sincronización">⚙️</button>
+        <div class="mes-pill" id="mes-pill"></div>
+      </div>
+      <span class="sync-badge off" id="sync-badge">☁️ sin sincronizar</span>
+    </div>
   </div>
   <div class="saldo-box">
     <div class="saldo-lbl">Disponible este mes</div>
@@ -298,7 +333,8 @@ select.fi{appearance:none;-webkit-appearance:none;}
 <script>
 const INGRESO=2646625,FIJOS=775305;
 const MESES_N=['Enero','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const STORAGE_KEY='gh_isaac_v8';
+const SYNC_CFG_KEY='gh_isaac_sync_cfg';
+const LOCAL_CACHE_KEY='gastos_isaac_final';
 
 const CATS={
   'Alimentación':{pres:863000,em:'🍽',color:'#2D6A4F',ej:['🛒 Supermercado','🥩 Carnes (Dona Carne)','🍞 Pan y panadería','🏪 Feria semanal','🍕 Delivery'],tip:'Tu categoría más grande — $863.000/mes.'},
@@ -339,45 +375,145 @@ let dashOffset=1;
 let chartT=null,chartC=null;
 let pendingImport=[];
 let saveTimeout=null;
+let syncCfg=null;
+try{syncCfg=JSON.parse(localStorage.getItem(SYNC_CFG_KEY)||'null');}catch(e){syncCfg=null;}
 
-// ============ STORAGE PERSISTENTE ============
+// ============ SINCRONIZACIÓN VIA JSONBIN.IO ============
+function setSyncStatus(state){
+  const si=document.getElementById('sync-indicator');
+  const badge=document.getElementById('sync-badge');
+  if(state==='syncing'){
+    si.textContent='☁️ Sincronizando...';si.style.display='block';si.style.background='var(--green)';
+  }else if(state==='ok'){
+    si.textContent='✅ Sincronizado';si.style.display='block';si.style.background='var(--green)';
+    setTimeout(()=>si.style.display='none',1500);
+    if(badge){badge.textContent='☁️ sincronizado';badge.className='sync-badge on';}
+  }else if(state==='error'){
+    si.textContent='⚠️ Sin conexión (guardado local)';si.style.display='block';si.style.background='var(--warn)';
+    setTimeout(()=>si.style.display='none',2500);
+    if(badge){badge.textContent='⚠️ sin conexión';badge.className='sync-badge off';}
+  }else if(state==='off'){
+    if(badge){badge.textContent='☁️ sin sincronizar';badge.className='sync-badge off';}
+  }
+}
+
+async function crearBinNuevo(masterKey){
+  const res=await fetch('https://api.jsonbin.io/v3/b',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Master-Key':masterKey,'X-Bin-Private':'true','X-Bin-Versioning':'false','X-Bin-Name':'gh_isaac_gastos'},
+    body:JSON.stringify({gastos:gastos,updatedAt:new Date().toISOString()})
+  });
+  if(!res.ok)throw new Error('http '+res.status);
+  const json=await res.json();
+  return json.metadata.id;
+}
+
+async function syncPull(){
+  if(!syncCfg||!syncCfg.masterKey||!syncCfg.binId)return false;
+  try{
+    setSyncStatus('syncing');
+    const res=await fetch(`https://api.jsonbin.io/v3/b/${syncCfg.binId}/latest`,{headers:{'X-Master-Key':syncCfg.masterKey}});
+    if(!res.ok)throw new Error('http '+res.status);
+    const json=await res.json();
+    gastos=(json.record&&json.record.gastos)?json.record.gastos:[];
+    try{localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));}catch(e){}
+    setSyncStatus('ok');
+    return true;
+  }catch(e){
+    setSyncStatus('error');
+    return false;
+  }
+}
+
+async function syncPush(){
+  if(!syncCfg||!syncCfg.masterKey||!syncCfg.binId)return false;
+  try{
+    setSyncStatus('syncing');
+    const res=await fetch(`https://api.jsonbin.io/v3/b/${syncCfg.binId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':syncCfg.masterKey,'X-Bin-Versioning':'false'},
+      body:JSON.stringify({gastos:gastos,updatedAt:new Date().toISOString()})
+    });
+    if(!res.ok)throw new Error('http '+res.status);
+    setSyncStatus('ok');
+    return true;
+  }catch(e){
+    setSyncStatus('error');
+    return false;
+  }
+}
+
+async function guardarSyncCfg(){
+  const mk=document.getElementById('sync-mk').value.trim();
+  let bid=document.getElementById('sync-bid').value.trim();
+  if(!mk){showToast('Ingresa tu Master Key');return;}
+  try{
+    if(!bid){
+      showToast('Creando bin nuevo...');
+      bid=await crearBinNuevo(mk);
+    }
+    syncCfg={masterKey:mk,binId:bid};
+    localStorage.setItem(SYNC_CFG_KEY,JSON.stringify(syncCfg));
+    document.getElementById('sync-bid').value=bid;
+    document.getElementById('sync-bid-display').textContent=bid;
+    document.getElementById('sync-info').style.display='block';
+    showToast('✅ Sincronización configurada');
+    await syncPull();
+    updateHdr();renderResumen();renderHistorial();renderDashboard();actualizarFiltroMes();
+  }catch(e){
+    showToast('❌ Error: revisa tu Master Key');
+  }
+}
+
+async function syncManual(){
+  if(!syncCfg||!syncCfg.masterKey||!syncCfg.binId){showToast('Primero configura la sincronización');return;}
+  const ok=await syncPull();
+  if(ok){
+    updateHdr();renderResumen();renderHistorial();renderDashboard();actualizarFiltroMes();
+    showToast('✅ Sincronizado');
+  }else{
+    showToast('⚠️ No se pudo sincronizar');
+  }
+}
+
+function abrirSyncMo(){
+  if(syncCfg){
+    document.getElementById('sync-mk').value=syncCfg.masterKey||'';
+    document.getElementById('sync-bid').value=syncCfg.binId||'';
+    if(syncCfg.binId){
+      document.getElementById('sync-bid-display').textContent=syncCfg.binId;
+      document.getElementById('sync-info').style.display='block';
+    }
+  }
+  document.getElementById('sync-mo').classList.add('open');
+}
+function closeSyncMo(){document.getElementById('sync-mo').classList.remove('open');}
+function cSyncMo(e){if(e.target===document.getElementById('sync-mo'))closeSyncMo();}
+
 async function cargarDatos(){
   try{
-    const r=await window.storage.get(STORAGE_KEY);
-    if(r&&r.value){
-      gastos=JSON.parse(r.value);
-    }
-  }catch(e){
-    // Si falla cloud storage, intentar localStorage como fallback
-    try{
-      const local=localStorage.getItem('gastos_isaac_final');
-      if(local) gastos=JSON.parse(local);
-    }catch(e2){}
+    const local=localStorage.getItem(LOCAL_CACHE_KEY);
+    if(local)gastos=JSON.parse(local);
+  }catch(e){}
+  if(syncCfg&&syncCfg.masterKey&&syncCfg.binId){
+    await syncPull();
+  }else{
+    setSyncStatus('off');
   }
   inicializar();
 }
 
-async function save(){
-  // Guardar en cloud storage
-  try{
-    const si=document.getElementById('sync-indicator');
-    si.style.display='block';
-    await window.storage.set(STORAGE_KEY,JSON.stringify(gastos));
-    // También guardar en localStorage como backup
-    try{localStorage.setItem('gastos_isaac_final',JSON.stringify(gastos));}catch(e){}
-    si.style.display='none';
-  }catch(e){
-    // Fallback a localStorage si cloud storage no disponible
-    try{localStorage.setItem('gastos_isaac_final',JSON.stringify(gastos));}catch(e2){}
-    document.getElementById('sync-indicator').style.display='none';
-  }
+function save(){
+  try{localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));}catch(e){}
+  syncPush();
 }
 
 function saveDebouncado(){
-  if(saveTimeout) clearTimeout(saveTimeout);
-  saveTimeout=setTimeout(save,1500);
+  try{localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));}catch(e){}
+  if(saveTimeout)clearTimeout(saveTimeout);
+  saveTimeout=setTimeout(syncPush,1500);
 }
-// =============================================
+// =========================================================
 
 function fmt(n){return '$'+Math.round(Math.abs(n)).toLocaleString('es-CL');}
 
