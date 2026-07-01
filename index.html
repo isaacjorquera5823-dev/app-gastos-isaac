@@ -199,7 +199,7 @@ select.fi{appearance:none;-webkit-appearance:none;}
     <div class="saldo-sub">Ingreso menos fijos y gastos registrados</div>
     <div class="saldo-row">
       <div class="saldo-mini"><div class="saldo-mini-l">Ingreso</div><div class="saldo-mini-v">$2.646.625</div></div>
-      <div class="saldo-mini"><div class="saldo-mini-l">Fijos</div><div class="saldo-mini-v">$775.305</div></div>
+      <div class="saldo-mini"><div class="saldo-mini-l">Fijos</div><div class="saldo-mini-v">$825.285</div></div>
       <div class="saldo-mini"><div class="saldo-mini-l">Gastado</div><div class="saldo-mini-v" id="gastado-tot">$0</div></div>
     </div>
   </div>
@@ -207,7 +207,7 @@ select.fi{appearance:none;-webkit-appearance:none;}
 
 <div class="tabs">
   <button class="tab active" onclick="sTab('resumen')" id="tab-resumen">📊 Resumen</button>
-  <button class="tab" onclick="sTab('fijos')" id="tab-fijos">🏦 Fijos</button>
+  <button class="tab" onclick="sTab('fijos')" id="tab-fijos">💰 Presupuesto</button>
   <button class="tab" onclick="sTab('registrar')" id="tab-registrar">➕ Manual</button>
   <button class="tab" onclick="sTab('importar')" id="tab-importar">📥 Importar</button>
   <button class="tab" onclick="sTab('historial')" id="tab-historial">📋 Historial</button>
@@ -220,7 +220,7 @@ select.fi{appearance:none;-webkit-appearance:none;}
   <div class="card">
     <div class="card-title">Resumen del mes</div>
     <div class="fi-item"><span class="fi-nom">Ingreso líquido</span><span class="fi-mon" style="color:var(--green)">$2.646.625</span></div>
-    <div class="fi-item"><span class="fi-nom">Compromisos fijos</span><span class="fi-mon" style="color:var(--red)">-$775.305</span></div>
+    <div class="fi-item"><span class="fi-nom">Compromisos fijos</span><span class="fi-mon" style="color:var(--red)">-$825.285</span></div>
     <div class="fi-item"><span class="fi-nom">Gastos variables</span><span class="fi-mon" id="r-var" style="color:var(--warn)">$0</span></div>
     <div class="fi-item" style="border-top:2px solid var(--border);padding-top:10px;margin-top:4px"><span class="fi-nom" style="font-weight:700">Disponible real</span><span class="fi-mon" id="r-disp" style="font-size:15px"></span></div>
   </div>
@@ -288,6 +288,14 @@ select.fi{appearance:none;-webkit-appearance:none;}
 
 <div class="sec" id="sec-fijos">
   <div class="card">
+    <div class="card-title">💰 Tu saldo libre</div>
+    <div class="fi-item"><span class="fi-nom">Ingreso líquido</span><span class="fi-mon" style="color:var(--green)">$2.646.625</span></div>
+    <div class="fi-item"><span class="fi-nom">Compromisos fijos</span><span class="fi-mon" style="color:var(--red)" id="fj-total-fijos">-$0</span></div>
+    <div class="fi-item"><span class="fi-nom">Presupuesto variable (si gastas justo lo presupuestado)</span><span class="fi-mon" style="color:var(--warn)" id="fj-total-variable">-$0</span></div>
+    <div class="fi-item" style="border-top:2px solid var(--border);padding-top:10px;margin-top:4px"><span class="fi-nom" style="font-weight:700">Saldo libre presupuestado</span><span class="fi-mon" id="fj-saldo-libre" style="font-size:15px"></span></div>
+    <div style="font-size:10px;color:var(--text2);margin-top:6px;line-height:1.5">Es lo que te quedaría libre cada mes si gastas exactamente lo presupuestado en cada categoría — útil para prepagos extraordinarios o imprevistos.</div>
+  </div>
+  <div class="card">
     <div class="card-title">Compromisos fijos mensuales</div>
     <div class="sec-hdr">💳 Deudas</div>
     <div class="fi-item"><span class="fi-nom">Crédito consumo (hasta dic 2026)</span><span class="fi-mon" style="color:var(--red)">$390.052</span></div>
@@ -297,60 +305,48 @@ select.fi{appearance:none;-webkit-appearance:none;}
     <div class="fi-item"><span class="fi-nom">Educación hijos</span><span class="fi-mon" style="color:var(--red)">$192.000</span></div>
     <div class="fi-item"><span class="fi-nom">Mesada Daniela</span><span class="fi-mon" style="color:var(--red)">$25.000</span></div>
     <div class="fi-item"><span class="fi-nom">Cuota Ritoque</span><span class="fi-mon" style="color:var(--red)">$25.000</span></div>
-    <div class="sec-hdr">📱 Telefonía</div>
-    <div class="fi-item"><span class="fi-nom">Entel tuyo + Daniela (base)</span><span class="fi-mon">$29.980</span></div>
-    <div class="fi-item" style="font-weight:700;border-top:2px solid var(--border);padding-top:10px;margin-top:4px"><span>Total fijos</span><span style="color:var(--red)">$775.305</span></div>
+    <div class="fi-item"><span class="fi-nom">Ahorro Daniel (automático)</span><span class="fi-mon" style="color:var(--red)">$20.000</span></div>
+    <div class="fi-item" style="font-weight:700;border-top:2px solid var(--border);padding-top:10px;margin-top:4px"><span>Total fijos</span><span style="color:var(--red)">$825.285</span></div>
   </div>
   <div class="card">
-    <div class="card-title">Presupuesto variable mensual</div>
-    <div class="sec-hdr">🍽 Alimentación</div>
-    <div class="fi-item"><span class="fi-nom">Supermercado + Feria + Carnes + Pan</span><span class="fi-mon">$863.000</span></div>
-    <div class="sec-hdr">🏠 Cuentas Casa</div>
-    <div class="fi-item"><span class="fi-nom">Enel Luz (promedio)</span><span class="fi-mon">$120.000</span></div>
-    <div class="fi-item"><span class="fi-nom">Smapa Agua</span><span class="fi-mon">$21.510</span></div>
-    <div class="fi-item"><span class="fi-nom">WOM Fibra (tu mitad)</span><span class="fi-mon">$21.674</span></div>
-    <div class="fi-item"><span class="fi-nom">DirecTV (tu mitad)</span><span class="fi-mon">$37.690</span></div>
-    <div class="fi-item"><span class="fi-nom">Gas</span><span class="fi-mon">$35.000</span></div>
-    <div class="fi-item"><span class="fi-nom">Otros casa</span><span class="fi-mon">$39.000</span></div>
-    <div class="sec-hdr">🚗 Transporte</div>
-    <div class="fi-item"><span class="fi-nom">Bencina</span><span class="fi-mon">$60.000</span></div>
-    <div class="fi-item"><span class="fi-nom">Autopistas urbanas</span><span class="fi-mon">$50.000</span></div>
-    <div class="fi-item"><span class="fi-nom">Seguro auto</span><span class="fi-mon">$35.000</span></div>
-    <div class="sec-hdr">💊 Salud</div>
-    <div class="fi-item"><span class="fi-nom">Salud general</span><span class="fi-mon">$40.000</span></div>
-    <div class="sec-hdr">🎬 Ocio</div>
-    <div class="fi-item"><span class="fi-nom">Ocio + entretenimiento</span><span class="fi-mon">$56.600</span></div>
-    <div class="fi-item"><span class="fi-nom">Cumpleaños + regalos familia</span><span class="fi-mon">$25.000</span></div>
-    <div class="sec-hdr">💰 Ahorro/Reserva</div>
-    <div class="fi-item"><span class="fi-nom">Ahorro Daniel</span><span class="fi-mon">$20.000</span></div>
-    <div class="fi-item"><span class="fi-nom">Reserva diciembre (ago–nov)</span><span class="fi-mon" style="color:var(--green)">$30.861</span></div>
-    <div class="fi-item" style="font-weight:700;border-top:2px solid var(--border);padding-top:10px;margin-top:4px"><span>Total variable</span><span>$1.369.335</span></div>
+    <div class="card-title">✏️ Presupuesto variable — editable</div>
+    <div id="pres-editor"></div>
+    <button class="btn" onclick="guardarPresupuestos()">💾 Guardar presupuestos</button>
+    <div class="fi-item" style="font-weight:700;border-top:2px solid var(--border);padding-top:10px;margin-top:10px"><span>Total variable</span><span id="pres-editor-total">$0</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Análisis de fin de mes</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Compara cada presupuesto con tu gasto real promedio de los últimos 3 meses completos, y te sugiere si conviene ajustarlo. Solo son sugerencias — tú decides si las aplicas en "Presupuesto variable" arriba.</div>
+    <button class="btn" style="background:var(--bg);color:var(--text);border:1.5px solid var(--border)" onclick="analizarPresupuesto()">🔍 Analizar mi presupuesto</button>
+    <div id="analisis-resultado" style="margin-top:12px"></div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const INGRESO=2646625,FIJOS=775305;
+const INGRESO=2646625,FIJOS=825285;
 const MESES_N=['Enero','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const SYNC_CFG_KEY='gh_isaac_sync_cfg';
 const LOCAL_CACHE_KEY='gastos_isaac_final';
+const PRES_CACHE_KEY='gh_isaac_presupuestos';
 
 const CATS={
-  'Alimentación':{pres:863000,em:'🍽',color:'#2D6A4F',ej:['🛒 Supermercado','🥩 Carnes (Dona Carne)','🍞 Pan y panadería','🏪 Feria semanal','🍕 Delivery'],tip:'Tu categoría más grande — $863.000/mes.'},
-  'Cuentas Casa':{pres:305854,em:'🏠',color:'#6366F1',ej:['💡 Enel (luz)','💧 Smapa (agua)','📡 WOM Fibra (tu mitad)','📺 DirecTV (tu mitad)','🔥 Gas','🔧 Reparaciones','🧹 Artículos limpieza'],tip:'Incluye cuentas del hogar — registra si hay variaciones.'},
+  'Alimentación':{pres:813000,em:'🍽',color:'#2D6A4F',ej:['🛒 Supermercado','🥩 Carnicería','🍞 Pan y panadería','🏪 Feria semanal'],tip:'Tu categoría más grande — $813.000/mes. Delivery y restaurantes van en "Salidas y Delivery".'},
+  'Salidas y Delivery':{pres:50000,em:'🍕',color:'#8E44AD',ej:['🍕 Delivery (Uber Eats, Rappi)','🍽 Restaurantes','🍔 Comida rápida'],tip:'Presupuesto separado para comer fuera o pedir delivery — $50.000/mes.'},
+  'Cuentas Casa':{pres:305854,em:'🏠',color:'#6366F1',ej:['💡 Enel (luz)','💧 Smapa (agua)','📡 WOM Fibra (tu mitad)','📺 DirecTV (tu mitad)','🔥 Gas','📱 Entel','🔧 Reparaciones','🧹 Artículos limpieza'],tip:'Incluye cuentas del hogar, incluyendo Entel.'},
   'Transporte':{pres:145000,em:'🚗',color:'#7a4800',ej:['⛽ Bencina','🛣 Autopistas (TAG/CSM)','🅿️ Estacionamientos','🔧 Mantención auto','🚕 Uber/Taxi'],tip:'Autopistas base $50.000 — varía según rutina.'},
   'Salud':{pres:40000,em:'💊',color:'#C0392B',ej:['💊 Farmacia (Ahumada, Cruz Verde)','👨‍⚕️ Consultas (copago)','🦷 Dentista','👓 Óptica'],tip:'Solo copagos y gastos no cubiertos por Banmédica.'},
   'Ocio':{pres:81600,em:'🎬',color:'#E67E22',ej:['🎬 Cine/entradas','🍽 Salidas a comer','🎮 Videojuegos','🏕 Actividades fin de semana','🎂 Cumpleaños','🎁 Regalos familia'],tip:'Incluye ocio, entretenimiento y gastos familiares eventuales.'},
-  'Ahorro/Reserva':{pres:50861,em:'💰',color:'#27AE60',ej:['🏦 Ahorro Daniel ($20.000)','🎄 Reserva diciembre ($30.861 ago–nov)'],tip:'Meta mínima: $50.861/mes.'},
+  'Ahorro/Reserva':{pres:30861,em:'💰',color:'#27AE60',ej:['🎄 Reserva diciembre ($30.861 ago–nov)'],tip:'Meta mínima: $30.861/mes. El ahorro Daniel es automático — está en Fijos.'},
   'Otros':{pres:60000,em:'📦',color:'#888',ej:['🛍 Compras no planeadas','🎁 Regalos','📝 Trámites','🔑 Imprevistos'],tip:'Para lo que no encaja en otra categoría.'},
 };
 
 const REGLAS=[
-  {k:['DONA CARNE','CARNIC'],c:'Alimentación'},{k:['LIDER','JUMBO','SANTA ISABEL','UNIMARC','TOTTUS','WALMART','SODEXO'],c:'Alimentación'},
+  {k:['CARNIC'],c:'Alimentación'},{k:['LIDER','JUMBO','SANTA ISABEL','UNIMARC','TOTTUS','WALMART','SODEXO'],c:'Alimentación'},
   {k:['LOS BUGUE','PANADERIA','PAN ','CONFITERIA','PASTELERIA','TIENDI'],c:'Alimentación'},
-  {k:['PRONTO PAJARITOS','RAYEN','RESTAURANT','REST ','COMIDA','DELIVERY','UBER EAT','RAPPI'],c:'Alimentación'},
-  {k:['MERCADOPAGO*ELDIA','MERCADOPAGO*COMER','MERCADOPAGO*SODEX','MERCADOPAGO*FRONT','MERCADOPAGO*FLORENC'],c:'Alimentación'},
+  {k:['PRONTO PAJARITOS','RAYEN','RESTAURANT','REST ','COMIDA','DELIVERY','UBER EAT','RAPPI'],c:'Salidas y Delivery'},
+  {k:['MERCADOPAGO*ELDIA','MERCADOPAGO*COMER','MERCADOPAGO*SODEX','MERCADOPAGO*FRONT','MERCADOPAGO*FLORENC'],c:'Salidas y Delivery'},
   {k:['ENEL','LUZ '],c:'Cuentas Casa'},{k:['SMAPA','AGUA '],c:'Cuentas Casa'},{k:['WOM','FIBRA'],c:'Cuentas Casa'},
   {k:['DIRECTV','DIRECT TV'],c:'Cuentas Casa'},{k:['GASCOMPU','GASCO'],c:'Cuentas Casa'},
   {k:['ENTEL'],c:'Cuentas Casa'},
@@ -370,6 +366,7 @@ function ignorar(d){const u=d.toUpperCase();return IGNORAR.some(i=>u.includes(i)
 function normalizarCat(c){return CATS[c]?c:'Otros';}
 
 let gastos=[];
+let presupuestosCustom={};
 let catSel='Alimentación';
 let dashOffset=1;
 let chartT=null,chartC=null;
@@ -416,7 +413,12 @@ async function syncPull(){
     if(!res.ok)throw new Error('http '+res.status);
     const json=await res.json();
     gastos=(json.record&&json.record.gastos)?json.record.gastos:[];
-    try{localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));}catch(e){}
+    presupuestosCustom=(json.record&&json.record.presupuestos)?json.record.presupuestos:{};
+    aplicarPresupuestosCustom();
+    try{
+      localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));
+      localStorage.setItem(PRES_CACHE_KEY,JSON.stringify(presupuestosCustom));
+    }catch(e){}
     setSyncStatus('ok');
     return true;
   }catch(e){
@@ -432,7 +434,7 @@ async function syncPush(){
     const res=await fetch(`https://api.jsonbin.io/v3/b/${syncCfg.binId}`,{
       method:'PUT',
       headers:{'Content-Type':'application/json','X-Master-Key':syncCfg.masterKey,'X-Bin-Versioning':'false'},
-      body:JSON.stringify({gastos:gastos,updatedAt:new Date().toISOString()})
+      body:JSON.stringify({gastos:gastos,presupuestos:presupuestosCustom,updatedAt:new Date().toISOString()})
     });
     if(!res.ok)throw new Error('http '+res.status);
     setSyncStatus('ok');
@@ -490,11 +492,22 @@ function abrirSyncMo(){
 function closeSyncMo(){document.getElementById('sync-mo').classList.remove('open');}
 function cSyncMo(e){if(e.target===document.getElementById('sync-mo'))closeSyncMo();}
 
+function aplicarPresupuestosCustom(){
+  Object.entries(presupuestosCustom).forEach(([c,v])=>{
+    if(CATS[c]&&typeof v==='number'&&!isNaN(v)&&v>=0)CATS[c].pres=v;
+  });
+}
+
 async function cargarDatos(){
   try{
     const local=localStorage.getItem(LOCAL_CACHE_KEY);
     if(local)gastos=JSON.parse(local);
   }catch(e){}
+  try{
+    const localPres=localStorage.getItem(PRES_CACHE_KEY);
+    if(localPres)presupuestosCustom=JSON.parse(localPres);
+  }catch(e){}
+  aplicarPresupuestosCustom();
   if(syncCfg&&syncCfg.masterKey&&syncCfg.binId){
     await syncPull();
   }else{
@@ -504,12 +517,18 @@ async function cargarDatos(){
 }
 
 function save(){
-  try{localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));}catch(e){}
+  try{
+    localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));
+    localStorage.setItem(PRES_CACHE_KEY,JSON.stringify(presupuestosCustom));
+  }catch(e){}
   syncPush();
 }
 
 function saveDebouncado(){
-  try{localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));}catch(e){}
+  try{
+    localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(gastos));
+    localStorage.setItem(PRES_CACHE_KEY,JSON.stringify(presupuestosCustom));
+  }catch(e){}
   if(saveTimeout)clearTimeout(saveTimeout);
   saveTimeout=setTimeout(syncPush,1500);
 }
@@ -523,6 +542,7 @@ document.getElementById('mes-pill').textContent=MESES_N[ahora.getMonth()]+' '+ah
 
 function getMesKey(offset=0){const d=new Date(ahora.getFullYear(),ahora.getMonth()-offset,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function getMesNombre(offset=0){const d=new Date(ahora.getFullYear(),ahora.getMonth()-offset,1);return MESES_N[d.getMonth()]+' '+d.getFullYear();}
+function getMesNombreFromKey(k){const p=k.split('-');return MESES_N[parseInt(p[1])-1]+' '+p[0];}
 function gastosDeMes(key){return gastos.filter(g=>g.fecha.startsWith(key));}
 function totMes(key){return gastosDeMes(key).reduce((s,g)=>s+g.monto,0);}
 function totCatMes(key){const t={};Object.keys(CATS).forEach(c=>t[c]=0);gastosDeMes(key).forEach(g=>{const cat=normalizarCat(g.cat);t[cat]=(t[cat]||0)+g.monto;});return t;}
@@ -570,7 +590,7 @@ function renderTendencia(){
   const meses=getMesesConDatos().slice(-6);if(!meses.length)return;
   const labels=meses.map(k=>{const p=k.split('-');return MESES_N[parseInt(p[1])-1];});
   if(chartT){chartT.destroy();}
-  chartT=new Chart(document.getElementById('chart-tendencia'),{type:'line',data:{labels,datasets:[{label:'Gasto total',data:meses.map(k=>totMes(k)),borderColor:'#2D6A4F',backgroundColor:'rgba(45,106,79,.1)',tension:.4,pointRadius:5,pointBackgroundColor:'#2D6A4F',fill:true},{label:'Presupuesto',data:meses.map(()=>1369335),borderColor:'#C0392B',borderDash:[4,4],pointRadius:0,fill:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K',font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}});
+  chartT=new Chart(document.getElementById('chart-tendencia'),{type:'line',data:{labels,datasets:[{label:'Gasto total',data:meses.map(k=>totMes(k)),borderColor:'#2D6A4F',backgroundColor:'rgba(45,106,79,.1)',tension:.4,pointRadius:5,pointBackgroundColor:'#2D6A4F',fill:true},{label:'Presupuesto',data:meses.map(()=>1526315),borderColor:'#C0392B',borderDash:[4,4],pointRadius:0,fill:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K',font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}});
 }
 
 function renderCatCompare(kA,kB){
@@ -598,7 +618,7 @@ function importar(input,fuente){
 function importarServipag(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});const items=[];const SC={'ENEL':'Cuentas Casa','SMAPA':'Cuentas Casa','WOM':'Cuentas Casa','DIRECTV':'Cuentas Casa','AUTOPISTA':'Transporte','VESPUCIO':'Transporte','RUTA':'Transporte','ENTEL':'Cuentas Casa'};for(const r of rows){const emp=String(r[1]||'').trim();const monto=parseFloat(String(r[3]||'0').replace(/[.$\s]/g,'').replace(',','.'));const fs=String(r[5]||'').trim();if(!emp||!monto||isNaN(monto)||monto<=0)continue;if(['Empresa','NaN','Total:','Periodo','Servicio'].includes(emp))continue;const cta=String(r[2]||'').toLowerCase();if(cta.includes('papás')||cta.includes('papas'))continue;let fecha=fs;const m=fs.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);if(m)fecha=`${m[3]}-${m[2]}-${m[1]}`;let cat='Cuentas Casa';const eu=emp.toUpperCase();for(const[k,v]of Object.entries(SC))if(eu.includes(k)){cat=v;break;}const nombre=emp+(r[2]?` - ${r[2]}`:'');const dup=esDup(monto,fecha,emp.slice(0,6));items.push({desc:nombre,monto,cat,fecha,fuente:'Servipag',dup});}mostrarPreview(items,'Servipag');}catch(e){showToast('Error al leer Servipag');}};
+  reader.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});const items=[];const SC={'ENEL':'Cuentas Casa','SMAPA':'Cuentas Casa','WOM':'Cuentas Casa','DIRECTV':'Cuentas Casa','AUTOPISTA':'Transporte','VESPUCIO':'Transporte','RUTA':'Transporte','ENTEL':'Cuentas Casa'};for(const r of rows){const emp=String(r[1]||'').trim();const monto=parseFloat(String(r[3]||'0').replace(/[.$\s]/g,'').replace(',','.'));const fs=String(r[5]||'').trim();if(!emp||!monto||isNaN(monto)||monto<=0)continue;if(['Empresa','NaN','Total:','Periodo','Servicio'].includes(emp))continue;const cta=String(r[2]||'').toLowerCase();if(cta.includes('papás')||cta.includes('papas'))continue;const eu=emp.toUpperCase();let fecha=fs;const m=fs.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);if(m)fecha=`${m[3]}-${m[2]}-${m[1]}`;let cat='Cuentas Casa';for(const[k,v]of Object.entries(SC))if(eu.includes(k)){cat=v;break;}const nombre=emp+(r[2]?` - ${r[2]}`:'');const dup=esDup(monto,fecha,emp.slice(0,6));items.push({desc:nombre,monto,cat,fecha,fuente:'Servipag',dup});}mostrarPreview(items,'Servipag');}catch(e){showToast('Error al leer Servipag');}};
   reader.readAsArrayBuffer(file);
 }
 
@@ -660,6 +680,75 @@ function abrirMo(cat){
 function closeMo(){document.getElementById('mo').classList.remove('open');}
 function cMo(e){if(e.target===document.getElementById('mo'))closeMo();}
 
+// ============ PRESUPUESTO EDITABLE + SALDO LIBRE + ANÁLISIS ============
+function totalVariablePres(){return Object.values(CATS).reduce((s,d)=>s+d.pres,0);}
+
+function renderFijosResumen(){
+  const tv=totalVariablePres();
+  document.getElementById('fj-total-fijos').textContent='-'+fmt(FIJOS);
+  document.getElementById('fj-total-variable').textContent='-'+fmt(tv);
+  document.getElementById('pres-editor-total').textContent=fmt(tv);
+  const libre=INGRESO-FIJOS-tv;
+  const el=document.getElementById('fj-saldo-libre');
+  el.textContent=fmt(libre);
+  el.style.color=libre<0?'var(--red)':libre<150000?'var(--warn)':'var(--green)';
+}
+
+function renderPresEditor(){
+  document.getElementById('pres-editor').innerHTML=Object.entries(CATS).map(([c,d])=>`
+    <div class="fg">
+      <label class="fl">${d.em} ${c}</label>
+      <input type="number" class="fi" id="pres-input-${c.replace(/\s/g,'_')}" data-cat="${c}" value="${d.pres}">
+    </div>`).join('');
+}
+
+function guardarPresupuestos(){
+  let changed=false;
+  document.querySelectorAll('#pres-editor input[data-cat]').forEach(el=>{
+    const c=el.dataset.cat;
+    const v=parseFloat(el.value);
+    if(!isNaN(v)&&v>=0&&v!==CATS[c].pres){
+      CATS[c].pres=v;
+      presupuestosCustom[c]=v;
+      changed=true;
+    }
+  });
+  if(!changed){showToast('Sin cambios');return;}
+  saveDebouncado();
+  showToast('✅ Presupuestos actualizados');
+  renderFijosResumen();renderResumen();renderDashboard();
+}
+
+function analizarPresupuesto(){
+  const kActual=getMesKey(0);
+  const mesesHist=getMesesConDatos().filter(k=>k!==kActual).slice(-3);
+  const cont=document.getElementById('analisis-resultado');
+  if(!mesesHist.length){
+    cont.innerHTML='<div class="empty">Aún no hay meses completos con datos para comparar. Vuelve a intentarlo cuando termines tu primer mes usando la app.</div>';
+    return;
+  }
+  let html=`<div style="font-size:11px;color:var(--text2);margin-bottom:10px">Comparando con: ${mesesHist.map(getMesNombreFromKey).join(', ')}</div>`;
+  Object.entries(CATS).forEach(([c,d])=>{
+    const valores=mesesHist.map(k=>totCatMes(k)[c]||0);
+    const promedio=valores.reduce((a,b)=>a+b,0)/valores.length;
+    const pres=d.pres;
+    const diffPct=pres?((promedio-pres)/pres*100):0;
+    let badge,color,sugerencia='';
+    if(Math.abs(diffPct)<10){
+      badge='✅ Bien calibrado';color='var(--green)';
+    }else if(diffPct>10){
+      badge='⚠️ Subestimado';color='var(--red)';
+      sugerencia=`Gastas en promedio ${fmt(promedio)}/mes. Considera subir el presupuesto a ~${fmt(promedio)}.`;
+    }else{
+      badge='💡 Sobreestimado';color='var(--warn)';
+      sugerencia=`Gastas en promedio solo ${fmt(promedio)}/mes. Podrías bajarlo a ~${fmt(promedio)} y liberar ${fmt(pres-promedio)}/mes.`;
+    }
+    html+=`<div class="cat-compare"><div class="cc-name">${d.em} <span style="font-size:11px">${c}</span></div><div style="flex:1;text-align:right"><div style="font-size:11px;font-weight:700;color:${color}">${badge}</div><div style="font-size:10px;color:var(--text2);margin-top:1px">Presup: ${fmt(pres)} · Real prom: ${fmt(promedio)}</div>${sugerencia?`<div style="font-size:10px;color:${color};margin-top:2px;line-height:1.4">${sugerencia}</div>`:''}</div></div>`;
+  });
+  cont.innerHTML=html;
+}
+// =========================================================================
+
 function sTab(n){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -667,6 +756,7 @@ function sTab(n){
   document.getElementById('tab-'+n).classList.add('active');
   if(n==='resumen')renderResumen();if(n==='dashboard')renderDashboard();
   if(n==='historial'){actualizarFiltroMes();renderHistorial();}
+  if(n==='fijos'){renderFijosResumen();renderPresEditor();}
 }
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2500);}
@@ -674,7 +764,7 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 function inicializar(){
   document.getElementById('fil-cat').innerHTML='<option value="">Todas las cat.</option>'+Object.keys(CATS).map(c=>`<option value="${c}">${CATS[c].em} ${c}</option>`).join('');
   document.getElementById('sel-cat-trend').innerHTML='<option value="">Todas las categorías</option>'+Object.keys(CATS).map(c=>`<option value="${c}">${CATS[c].em} ${c}</option>`).join('');
-  renderCats();updateHdr();renderResumen();actualizarFiltroMes();
+  renderCats();updateHdr();renderResumen();actualizarFiltroMes();renderFijosResumen();renderPresEditor();
 }
 
 // Iniciar cargando datos desde storage persistente
